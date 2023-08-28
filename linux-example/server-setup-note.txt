@@ -1,0 +1,180 @@
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINW4KdrKLrwBO9kkWCJbS6hJdRLPxmJC3ExxnOfn5IoV phanuphong@thaitv3.com
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGC6m3gM2ifA8s5RcXXS+rE/IiZoZ3PGnnn8BcpWxmn0 maxx@odin-mbp
+
+dhcp range
+10.2.3.151-170
+
+deb http://10.1.0.33:3142/th.archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse
+deb http://10.1.0.33:3142/th.archive.ubuntu.com/ubuntu/ jammy-updates main restricted universe multiverse
+deb http://10.1.0.33:3142/th.archive.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse
+
+198,63,31
+
+# Here document
+
+# .vimrc
+syntax on
+set relativenumber
+set ts=4 sts=4 sw=4 expandtab
+autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+
+===
+1. edit /etc/apt/source.list
+2. set timezone, ntp
+timedatectl set-timezone 'Asia/Bangkok'
+timedatectl set-ntp 'time.thaitv3.com'
+3. install docker, docker-compose
+4. config logrotate
+5. create key to log in git
+6. set up ufw
+
+# Check ntp status
+systemctl status systemd-timesyncd.service
+
+===
+/home/ubuntu/container/rproxy/nginxlog/*.log {
+  weekly
+  compress
+  rotate 26
+  missingok
+  create
+  sharedscripts
+  postrotate
+    docker-compose -f /home/ubuntu/container/rproxy/docker-compose.yml restart > /dev/null 2>/dev/null || true
+  endscript
+}
+
+===
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+sudo ufw allow 22
+sudo ufw allow 80
+sudo ufw allow 443
+sudo ufw allow 10000 # sdp
+
+# For app server
+sudo ufw allow from 10.1.0.0/24 to any port 8000 # phpipam
+sudo ufw allow from 10.1.0.0/24 to any port 8001 # smsapp
+sudo ufw allow from 10.1.0.0/24 to any port 8002 # fwblacklist
+sudo ufw enable
+
+===
+network:
+    ethernets:
+        ens192:
+            dhcp4: no
+            addresses: [10.1.0.99/24]
+            gateway4: 10.1.0.250
+            nameservers:
+                addresses: [10.1.0.86,10.1.0.87]
+            dhcp6: no
+            match:
+                macaddress: 00:50:56:be:a8:e1
+            set-name: ens192
+    version: 2
+  
+  ===
+    # Ubuntu 22 network config
+  
+  # create new
+network:
+  ethernets:
+    # interface name
+    enp1s0:
+      dhcp4: false
+      # IP address/subnet mask
+      addresses: [10.0.0.30/24]
+      # default gateway
+      # [metric] : set priority (specify it if multiple NICs are set)
+      # lower value is higher priority
+      routes:
+        - to: default
+          via: 10.0.0.1
+          metric: 100
+      nameservers:
+        # name server to bind
+        addresses: [10.0.0.10,10.0.0.11]
+        # DNS search base
+        search: [srv.world,server.education]
+      dhcp6: false
+  version: 2
+  
+ ### 
+ network:
+    ethernets:
+        ens192:
+            dhcp4: false
+            addresses: [10.2.3.21/24]
+            routes:
+              - to: default
+                via: 10.2.3.9
+                metric: 100
+            nameservers:
+                addresses: [10.1.0.86,10.1.0.87]
+            dhcp6: false
+            match:
+                macaddress: 00:50:56:97:77:b6
+            set-name: ens192
+    version: 2
+	
+###	
+ 
+ 
+ # Create new user
+ sudo useradd -s /bin/bash -d /home/zbadmin/ -m -G sudo zbadmin
+-s /bin/bash # Set shell
+-d /home/zbdmin # Set home directory
+-m # Create the user's home directory
+-G sudo # Add user to sudo Group
+
+###
+ 
+  
+  # Backup
+docker exec CONTAINER /usr/bin/mysqldump -u root --password=root DATABASE > backup-$(date --iso-8601).sql
+
+docker exec demo-phpipam_phpipam-mariadb_1 /usr/bin/mysql -u root --password=mysecret1234 phpipam > backup-ipam-$(date --iso-8601).sql
+
+# Restore
+cat backup.sql | docker exec CONTAINER /usr/bin/mysql -u root --password=root DATABASE
+  
+===
+Docker and UFW don't work together too well as they both modify iptables but there's a way to fix this. You'll need to configure Docker to not use iptables. Add
+
+DOCKER_OPTS="--iptables=false"
+to /etc/default/docker and restart your host (or restart the Docker daemon and UFW).
+
+These two links have a lot more information about the issue:
+
+https://blog.viktorpetersson.com/2014/11/03/the-dangers-of-ufw-docker.html
+https://www.techrepublic.com/article/how-to-fix-the-docker-and-ufw-security-flaw/
+
+===
+apt-get update -y -qq
+apt-get install -y -qq --no-install-recommends docker-ce >/dev/null
+
+# Test password generator
+tr -c -d '0-9a-zA-Z' < /dev/urandom | dd bs=32 count=1 2>/dev/null ; echo
+
+### Analyzing data flow with the dd command
+# Write test
+time dd if=/dev/zero of=/path/filename bs=262144 count=40960
+
+# Read test
+time dd if=filename of=/dev/null bs=262144 count=40960
+
+## Install docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh ./get-docker.sh --dry-run
+
+sudo usermod -aG docker $USER
+
+
+# Install docker compose, from Digital Ocean
+mkdir -p ~/.docker/cli-plugins/
+curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+
+chmod +x ~/.docker/cli-plugins/docker-compose
+
+

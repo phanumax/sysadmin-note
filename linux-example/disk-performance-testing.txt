@@ -1,0 +1,6 @@
+### Analyzing data flow with the dd command
+# Write test
+time dd if=/dev/zero of=/path/filename bs=262144 count=40960
+
+# Read test
+time dd if=filename of=/dev/null bs=262144 count=40960

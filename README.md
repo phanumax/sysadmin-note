@@ -1,3 +1,3 @@
 ﻿# sysadmin-note
-### My brain has memory limited. That's why I wirte here.
-### Thank you !!!
+### My brain has memory limit, write down here.
+### Thank you.

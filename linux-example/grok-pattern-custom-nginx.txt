@@ -1,0 +1,4 @@
+# Grok pattern 
+# nginx_custom_pretty
+
+grok_pattern: %{TIMESTAMP_ISO8601:timestamp} %{IPORHOST:remote_addr} \"%{WORD:request_verb} %{NOTSPACE:request_path} %{NOTSPACE:http_version}\" %{NOTSPACE:cache_status} %{NOTSPACE:response_status} %{NOTSPACE:request_time} %{NOTSPACE:bytes_sent} %{NOTSPACE:body_bytes_sents} \"%{NOTSPACE:http_referrer}\" \"%{DATA:user_agent}\" \"%{NOTSPACE:forwarded_for}\"

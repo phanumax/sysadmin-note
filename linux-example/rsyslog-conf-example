@@ -1,0 +1,36 @@
+# provides remote UDP syslog reception
+$ModLoad imudp
+$UDPServerRun 514
+
+# If logging to an NFS mount, use these settings...
+#    "OMFileFlushOnTXEnd off" avoids fsync on every write...
+#     mount -o hard,rsize=32768,wsize=32768,noacl,noatime,nodiratime -t nfs
+$OMFileIOBufferSize 768k
+$OMFileAsyncWriting on
+$OMFileFlushOnTXEnd off
+$OMFileFlushInterval 10
+$MainMsgQueueSize 100000
+
+
+# kill all INTF-FLAP messages...
+if $msg contains 'INTF-FLAP' then /dev/null
+&~
+## Cisco ACS Accounting...
+if ($fromhost-ip=='172.17.16.20') and ($programname == 'CSCOacs_TACACS_Accounting') then /var/log/tacacs_acct.log
+&~
+## CiscoACS 5.4 TACACS Authentication
+if ($fromhost-ip=='172.17.16.20') and ($programname == 'CSCOacs_Passed_Authentications') then /var/log/tacacs_auth.log
+&~
+
+# Logging for Chicago issues...
+if $fromhost-ip startswith '172.17.25' then /var/log/net/chicago.log
+& ~
+# Logging for Dallas issues...
+if $fromhost-ip startswith '172.17.27' then /var/log/net/dallas.log
+& ~
+# Logging for firewall...
+if $fromhost-ip=='172.17.4.4' then @10.14.12.12
+if $fromhost-ip=='172.17.4.4' then /var/log/net/firewall.log
+& ~
+
+# Replace ~ with stop

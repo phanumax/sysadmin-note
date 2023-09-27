@@ -6,13 +6,14 @@ su root syslog
 /var/log/vmware-esxi.log
 /var/log/paloalto/firewall.log
 {
-    size 2048M
-    rotate 4 # Keep 4 recent files
-    missingok
-    compress
-    notifempty
-    create 0644 syslog adm
+    size 2048M # Rotate when the log file reachs 2048MB (adjust as needed)
+    rotate 4 # Keep 4 old versions
+    missingok # Don't complain if the log file is missing
+    compress # Compress old log files
+    notifempty # Don't rotate empty log files
+    create 0644 syslog adm # Create new log files with these permissions
     postrotate
-        /usr/lib/rsyslog/rsyslog-rotate
+        # Custom actions to perform after log rotation
+        /usr/lib/rsyslog/rsyslog-rotate # Restart rsyslog.service
     endscript
 }

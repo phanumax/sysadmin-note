@@ -1,0 +1,5 @@
+# Customize Bash history format
+export HISTTIMEFORMAT="%F %T "
+
+# You can unset variable by
+unset HISTTIMEFORMAT

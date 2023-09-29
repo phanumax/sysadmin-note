@@ -6,7 +6,7 @@ su root syslog
 /var/log/vmware-esxi.log
 /var/log/paloalto/firewall.log
 {
-    size 2048M # Rotate when the log file reachs 2048MB (adjust as needed)
+    size 2G # Rotate when the log file reachs 2G (adjust as needed)
     rotate 4 # Keep 4 old versions
     missingok # Don't complain if the log file is missing
     compress # Compress old log files

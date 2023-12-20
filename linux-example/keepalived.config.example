@@ -1,0 +1,59 @@
+# From https://www.server-world.info/en
+# Master node
+global_defs {
+    vrrp_version 3
+    # set hostname
+    router_id server-lb1
+}
+
+vrrp_instance VRRP1 {
+    # on primary node, specify [MASTER]
+    # on backup node, specify [BACKUP]
+    # if specified [BACKUP] + [nopreempt] on all nodes, automatic failback is disabled
+    state MASTER
+    # if you like disable automatic failback, set this value with [BACKUP]
+    # nopreempt
+    # network interface that virtual IP address is assigned
+    interface ens192
+    # set unique ID on each VRRP interface
+    # on the a VRRP interface, set the same ID on all nodes
+    virtual_router_id 101
+    # set priority : [Master] > [BACKUP]
+    priority 200
+    # VRRP advertisement interval (sec)
+    advert_int 1
+
+    unicast_src_ip 10.1.110.101
+
+    unicast_peer {
+        10.1.110.102
+    }
+    # virtual IP address
+    virtual_ipaddress {
+        10.1.110.100/24
+    }
+}
+
+# Backukp node
+global_defs {
+    vrrp_version 3
+    router_id server-ha2
+}
+
+vrrp_instance VRRP1 {
+    state BACKUP
+    # nopreempt
+    interface ens192
+    virtual_router_id 101
+    priority 100
+    advert_int 1
+    unicast_src_ip 10.1.110.102
+
+    unicast_peer {
+        10.1.110.101
+    }
+
+    virtual_ipaddress {
+        10.1.110.100/24
+    }
+}

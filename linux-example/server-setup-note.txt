@@ -22,7 +22,9 @@ autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 1. edit /etc/apt/source.list
 2. set timezone, ntp
 timedatectl set-timezone 'Asia/Bangkok'
-timedatectl set-ntp 'time.thaitv3.com'
+# timedatectl set-ntp 'time.thaitv3.com'
+Edit sudo vi /etc/systemd/timesyncd.conf 
+
 3. install docker, docker-compose
 4. config logrotate
 5. create key to log in git
@@ -120,6 +122,28 @@ network:
 	
 ###	
  
+ network:
+    ethernets:
+        ens192:
+            dhcp4: false
+            addresses: [10.2.4.18/24]
+            routes:
+             - to: default
+               via: 10.2.4.253
+               metric: 100
+             - to: 10.1.0.0/24
+               via: 10.2.4.9
+             - to: 10.2.3.0/24
+               via: 10.2.4.9
+            nameservers:
+               addresses: [10.2.4.86,10.2.129.86]
+            dhcp6: false
+            match:
+                macaddress: 00:50:56:ae:3f:ae
+            set-name: ens192
+    version: 2
+ 
+ 
  
  # Create new user
  sudo useradd -s /bin/bash -d /home/zbadmin/ -m -G sudo zbadmin
@@ -173,8 +197,8 @@ sudo usermod -aG docker $USER
 
 # Install docker compose, from Digital Ocean
 mkdir -p ~/.docker/cli-plugins/
-curl -SL https://github.com/docker/compose/releases/download/v2.20.3/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
 
+curl -SL https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
 
 chmod +x ~/.docker/cli-plugins/docker-compose
 

@@ -5,7 +5,11 @@ global_defs {
     # set hostname
     router_id server-lb1
 }
-
+# enter failed state when the nginx process is down
+vrrp_track_process track_nginx {
+    process nginx
+    delay 1
+}
 vrrp_instance VRRP1 {
     # on primary node, specify [MASTER]
     # on backup node, specify [BACKUP]
@@ -31,6 +35,9 @@ vrrp_instance VRRP1 {
     # virtual IP address
     virtual_ipaddress {
         10.1.110.100/24
+    }
+	track_process {
+        track_nginx
     }
 }
 
